@@ -1,7 +1,10 @@
+/* eslint-disable no-param-reassign */
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import placesApi from '../requests/placesApi';
 
 const initialState = {
   places: [],
+  selectedPlace: null,
   status: 'uninitialized',
   error: null,
 };
@@ -13,9 +16,9 @@ export const getViewablePlaces = createAsyncThunk(
       const places = await placesApi.getViewablePlaces(creatorId);
       return places;
     } catch (error) {
-      throw new Error(`Error getting viewable places: ${error}`)
+      throw new Error(`Error getting viewable places: ${error}`);
     }
-  }
+  },
 );
 
 export const getPublicPlaces = createAsyncThunk(
@@ -25,9 +28,9 @@ export const getPublicPlaces = createAsyncThunk(
       const places = await placesApi.getPublicPlaces();
       return places;
     } catch (error) {
-      throw new Error(`Error getting public places: ${error}`)
+      throw new Error(`Error getting public places: ${error}`);
     }
-  }
+  },
 );
 
 export const getAuthoredPlaces = createAsyncThunk(
@@ -37,9 +40,9 @@ export const getAuthoredPlaces = createAsyncThunk(
       const places = await placesApi.getAuthoredPlaces(creatorId);
       return places;
     } catch (error) {
-      throw new Error(`Error getting authored places: ${error}`)
+      throw new Error(`Error getting authored places: ${error}`);
     }
-  }
+  },
 );
 
 export const createPlace = createAsyncThunk(
@@ -49,15 +52,20 @@ export const createPlace = createAsyncThunk(
       const place = await placesApi.createPlace(placeData);
       return place;
     } catch (error) {
-      throw new Error(`Error creating place: ${error}`)
+      throw new Error(`Error creating place: ${error}`);
     }
-  }
+  },
 );
 
+// Don't need to worry about param reassign coming from eslint cause slice uses immer
 const placesSlice = createSlice({
   name: 'places',
   initialState,
-  reducers: {},
+  reducers: {
+    selectPlace: (state, action) => {
+      state.selectedPlace = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getViewablePlaces.pending, (state) => {
@@ -104,5 +112,9 @@ const placesSlice = createSlice({
         state.status = 'idle';
         state.error = action.error.message;
       });
-  }
-})
+  },
+});
+
+export const { selectPlace } = placesSlice.actions;
+
+export default placesSlice.reducer;
