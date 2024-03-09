@@ -12,7 +12,7 @@ const createPlace = async (placeData) => {
   } catch (error) {
     throw new Error(`Error creating place: ${error}`);
   }
-}
+};
 
 const getAuthoredPlaces = async (creatorId) => {
   try {
@@ -24,7 +24,7 @@ const getAuthoredPlaces = async (creatorId) => {
   } catch (error) {
     throw new Error(`Error getting authored places: ${error}`);
   }
-}
+};
 
 const getViewablePlaces = async (creatorId) => {
   try {
@@ -36,7 +36,7 @@ const getViewablePlaces = async (creatorId) => {
   } catch (error) {
     throw new Error(`Error getting viewable places: ${error}`);
   }
-}
+};
 
 const getPublicPlaces = async () => {
   try {
@@ -48,13 +48,13 @@ const getPublicPlaces = async () => {
   } catch (error) {
     throw new Error(`Error getting viewable places: ${error}`);
   }
-}
+};
 
 const placesApi = {
+  createPlace,
   getAuthoredPlaces,
   getViewablePlaces,
   getPublicPlaces,
 };
-
 
 export default placesApi;
