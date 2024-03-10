@@ -1,14 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import {
-  View, Text, Button, StyleSheet, Modal, SafeAreaView,
+  View, Text, StyleSheet, Image, Modal,
 } from 'react-native';
+
+import {
+  SafeAreaView, Fab, FabLabel, AddIcon, FabIcon, Button, ButtonText,
+} from '@gluestack-ui/themed';
 import { getRhumbLineBearing, getDistance } from 'geolib';
 import * as Location from 'expo-location';
 import { discoverPlace } from '../redux/placesSlice';
 
+import Arrow from '../assets/arrow.png';
+
 function Compass({ navigation }) {
-  const [heading, setHeading] = useState(null);
+  // const [heading, setHeading] = useState(null);
   const [angle, setAngle] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [distance, setDistance] = useState(9999);
@@ -25,7 +31,7 @@ function Compass({ navigation }) {
     let headingSubscription;
     (async () => {
       headingSubscription = await Location.watchHeadingAsync((newHeading) => {
-        setHeading(newHeading);
+        // setHeading(newHeading);
 
         if (longitude && latitude && selectedPlace) {
           const idealBearing = getRhumbLineBearing(
@@ -78,16 +84,42 @@ function Compass({ navigation }) {
 
   const renderCompass = () => {
     if (selectedPlace) {
-      return (
-        <View>
-          <Text>{`Navigating to ${selectedPlace.name}`}</Text>
-        </View>
-      );
+      const isDiscovered = selectedPlace.discoveredBy.some((discoverer) => discoverer.user._id === user._id);
+
+      if (isDiscovered) {
+        return (
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            {`Navigating to ${selectedPlace.name}`}
+          </Text>
+        );
+      } else {
+        return (
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            Navigating to ???
+          </Text>
+        );
+      }
     } else {
       return (
-        <View>
-          <Text>Select a place to get started</Text>
-        </View>
+
+        <Text
+          style={{
+            fontSize: 16,
+            fontWeight: 'bold',
+          }}
+        >
+          Select a place to start navigating!
+        </Text>
       );
     }
   };
@@ -112,42 +144,63 @@ function Compass({ navigation }) {
     transform: [{ rotate: `${angle}deg` }],
   };
 
-  const renderHeading = () => {
-    if (heading) {
-      return (
-        <View>
-          <Text>
-            Heading
-            {heading.trueHeading}
-            {angle}
-          </Text>
-        </View>
-      );
-    } else {
-      return (
-        <View>
-          <Text>No heading</Text>
-        </View>
-      );
-    }
-  };
+  // const renderHeading = () => {
+  //   if (heading) {
+  //     return (
+  //       <View>
+  //         <Text>
+  //           Heading
+  //           {heading.trueHeading}
+  //           {angle}
+  //         </Text>
+  //       </View>
+  //     );
+  //   } else {
+  //     return (
+  //       <View>
+  //         <Text>No heading</Text>
+  //       </View>
+  //     );
+  //   }
+  // };
+
   if (places) {
     return (
-      <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-        <Text>
-          {`Hey ${user.username}! Let's start exploring`}
+      <SafeAreaView style={{
+        flex: 1,
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginTop: 100,
+      }}
+      >
+        <Text
+          style={{
+            fontSize: 24,
+            fontWeight: 'bold',
+            marginBottom: 20,
+          }}
+        >
+          {`Hey ${user.username}, let's start exploring!`}
         </Text>
-        {renderHeading()}
-        {renderCompass()}
-        <Text>{`Distance to target: ${distance} meters`}</Text>
+
+        {/* {renderHeading()} */}
+
         <Button
-          title="Go to Places"
           onPress={() => navigation.navigate('Places')}
-        />
-        <Button
-          title="Create a Place"
-          onPress={() => navigation.navigate('CreatePlace')}
-        />
+        >
+          <ButtonText>Navigate to a Place</ButtonText>
+        </Button>
+
+        <Fab
+          style={{
+            marginBottom: 30,
+            marginRight: 10,
+          }}
+          onPress={() => navigation.navigate('Create a Place')}
+        >
+          <FabIcon as={AddIcon} mr="$1" />
+          <FabLabel>Create a New Place</FabLabel>
+        </Fab>
 
         <Modal
           animationType="slide"
@@ -168,39 +221,124 @@ function Compass({ navigation }) {
 
         <View style={styles.container}>
           <View style={[styles.circle, compassStyle]}>
-            <View style={styles.triangle} />
+            {/* <View style={styles.triangle} /> */}
+            <Image
+              source={Arrow}
+              style={{
+                width: 100,
+                height: 100,
+                transform: [{ translateY: -10 }],
+              }}
+            />
+          </View>
+          <View
+            style={{
+              marginTop: 20,
+              flex: 1,
+              alignItems: 'center',
+            }}
+          >
+            {renderCompass()}
+
+            {
+              selectedPlace ? (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {`${distance} meters away`}
+                </Text>
+              )
+                : null
+
+            }
+
           </View>
         </View>
       </SafeAreaView>
     );
   }
   return (
-    <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-      <Text>Loading...</Text>
+    <SafeAreaView style={{
+      flex: 1,
+      alignItems: 'center',
+      justifyContent: 'center',
+      marginTop: 100,
+    }}
+    >
+      <Text
+        style={{
+          fontSize: 24,
+          fontWeight: 'bold',
+          marginBottom: 20,
+        }}
+      >
+        Loading...
+      </Text>
+
+      {/* {renderHeading()} */}
+
       <Button
-        title="Go to Places"
         onPress={() => navigation.navigate('Places')}
-      />
-      <Button
-        title="Create a Place"
+      >
+        <ButtonText>Navigate to a Place</ButtonText>
+      </Button>
+
+      <Fab
+        style={{
+          marginBottom: 30,
+          marginRight: 10,
+        }}
         onPress={() => navigation.navigate('CreatePlace')}
-      />
+      >
+        <FabIcon as={AddIcon} mr="$1" />
+        <FabLabel>Create A New Place</FabLabel>
+      </Fab>
+
+      {/* <View style={styles.container}>
+        <View style={[styles.circle, compassStyle]}>
+          <Image
+            source={Arrow}
+            style={{
+              width: 100,
+              height: 100,
+              transform: [{ translateY: -10 }],
+            }}
+          />
+        </View>
+      </View> */}
+
+      {/* {renderCompass()} */}
     </SafeAreaView>
+    // <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    //   <Text>Loading...</Text>
+    //   <Button
+    //     title="Go to Places"
+    //     onPress={() => navigation.navigate('Places')}
+    //   />
+    //   <Button
+    //     title="Create a Place"
+    //     onPress={() => navigation.navigate('CreatePlace')}
+    //   />
+    // </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+    justifyContent: 'flex-start',
     alignItems: 'center',
   },
   circle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    borderWidth: 2,
-    borderColor: 'black',
+    marginTop: 100,
+    width: 200,
+    height: 200,
+    borderRadius: 100,
+    borderWidth: 10,
+    borderColor: 'red',
     justifyContent: 'center',
     alignItems: 'center',
   },

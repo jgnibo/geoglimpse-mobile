@@ -77,13 +77,25 @@ export default function Navigation() {
         {user && user._id
           ? (
             <>
-              <Stack.Screen name="Home" component={Compass} />
+              <Stack.Screen name="Home"
+                options={{
+                  headerShown: false,
+                }}
+                component={Compass}
+              />
               <Stack.Screen name="Places" component={Places} />
-              <Stack.Screen name="CreatePlace" component={CreatePlace} />
+              <Stack.Screen name="Create a Place" component={CreatePlace} />
 
             </>
           )
-          : <Stack.Screen name="Login" component={Login} />}
+          : (
+            <Stack.Screen name="Login"
+              component={Login}
+              options={{
+                headerShown: false,
+              }}
+            />
+          )}
       </Stack.Navigator>
     </NavigationContainer>
   );
