@@ -57,6 +57,18 @@ export const createPlace = createAsyncThunk(
   },
 );
 
+export const discoverPlace = createAsyncThunk(
+  'places/discoverPlace',
+  async (discoveryData) => {
+    try {
+      const place = await placesApi.discoverPlace(discoveryData);
+      return place;
+    } catch (error) {
+      throw new Error(`Error discovering place: ${error}`);
+    }
+  },
+);
+
 // Don't need to worry about param reassign coming from eslint cause slice uses immer
 const placesSlice = createSlice({
   name: 'places',
@@ -109,6 +121,21 @@ const placesSlice = createSlice({
         state.places.push(action.payload);
       })
       .addCase(createPlace.rejected, (state, action) => {
+        state.status = 'idle';
+        state.error = action.error.message;
+      })
+      .addCase(discoverPlace.pending, (state) => {
+        state.status = 'loading';
+      })
+      .addCase(discoverPlace.fulfilled, (state, action) => {
+        state.status = 'idle';
+        state.selectedPlace = action.payload;
+        const index = state.places.findIndex((place) => place._id === action.payload._id);
+        if (index !== -1) {
+          state.places[index] = action.payload;
+        }
+      })
+      .addCase(discoverPlace.rejected, (state, action) => {
         state.status = 'idle';
         state.error = action.error.message;
       });
