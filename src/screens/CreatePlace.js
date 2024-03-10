@@ -13,6 +13,9 @@ function CreatePlaceScreen({ navigation }) {
     places, selectedPlace, status, error,
   } = useSelector((state) => state.places);
 
+  const { user } = useSelector((state) => state.user);
+  const { longitude, latitude } = useSelector((state) => state.location);
+
   const dispatch = useDispatch();
 
   const handleCreatePlace = async () => {
@@ -23,7 +26,9 @@ function CreatePlaceScreen({ navigation }) {
     try {
       const trimmedName = name.trim();
       const trimmedDesc = description.trim();
-      await dispatch(createPlace({ trimmedName, trimmedDesc }));
+      await dispatch(createPlace({
+        creatorId: user._id, name: trimmedName, description: trimmedDesc, imageUrl: '', location: { type: 'Point', coordinates: [longitude, latitude] }, isPublic: true,
+      }));
       if (status === 'idle' && !error) {
         navigation.navigate('Home');
       } else {

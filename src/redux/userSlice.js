@@ -13,7 +13,6 @@ const initialState = {
 export const login = createAsyncThunk(
   'user/getUserByUsername',
   async (username) => {
-    console.log('WHAT THE FUCK', username);
     try {
       const user = await userApi.getUserByUsername(username);
       return user;

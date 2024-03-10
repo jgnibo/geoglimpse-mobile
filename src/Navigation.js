@@ -1,12 +1,7 @@
-import 'react-native-gesture-handler';
-
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
-
 import React, { useState, useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Provider, useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import * as Location from 'expo-location';
 import Compass from './screens/Compass';
 import CreatePlace from './screens/CreatePlace';
@@ -22,7 +17,7 @@ export default function Navigation() {
   // const [errorMsg, setErrorMsg] = useState(null);
   const [ws, setWs] = useState(null);
 
-  const { user, status, error } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
 
   const [lastSentLocation, setLastSentLocation] = useState([0, 0]);
   const lastSentLocationRef = useRef([0, 0]);
@@ -92,12 +87,3 @@ export default function Navigation() {
     </NavigationContainer>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});

@@ -1,6 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import {
-  View, FlatList, ActivityIndicator, Text, TouchableOpacity, RefreshControl, StyleSheet, Button,
+  View, FlatList, Text, TouchableOpacity, RefreshControl, StyleSheet, Button,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { getViewablePlaces, selectPlace } from '../redux/placesSlice';
@@ -11,14 +11,14 @@ function Places({ navigation }) {
     // eslint-disable-next-line no-unused-vars
     places, selectedPlace, status, error,
   } = useSelector((state) => state.places);
+  const { user } = useSelector((state) => state.user);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedIds, setExpandedIds] = useState([]);
-  const userId = '65ea4d67b018e631a0b4003f';
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await dispatch(getViewablePlaces('65ea4d67b018e631a0b4003f'));
+      dispatch(getViewablePlaces(user._id));
     } catch (err) {
       console.error('Error refreshing places:', err);
     } finally {
@@ -26,12 +26,16 @@ function Places({ navigation }) {
     }
   }, [dispatch]);
 
-  // const data = preparePlacesData(places, userId);
+  const preparePlacesData = () => {
+    const discoveredPlaces = places.filter((place) => place.discoveredBy.some((d) => d.user._id === user._id));
+    const undiscoveredPlaces = places.filter((place) => !place.discoveredBy.some((d) => d.user._id === user._id));
 
-  const handleSelectPlace = (place) => {
-    dispatch(selectPlace(place));
-    navigation.navigate('Home');
-    console.log('Selected place:', selectedPlace);
+    return [
+      { _id: 'discovered_header', type: 'header', title: 'Discovered Places' },
+      ...discoveredPlaces,
+      { _id: 'undiscovered_header', type: 'header', title: 'Undiscovered Places' },
+      ...undiscoveredPlaces,
+    ];
   };
 
   const toggleExpandPlaceCard = (placeId) => {
@@ -39,50 +43,43 @@ function Places({ navigation }) {
   };
 
   const renderPlaceCard = ({ item }) => {
-    const isDiscovered = item.discoveredBy.some((discoverer) => discoverer.user._id === userId);
-    const isExpanded = expandedIds.includes(item._id);
+    if (item.type === 'header') {
+      return <Text style={styles.header}>{item.title}</Text>;
+    } else {
+      const isDiscovered = item.discoveredBy.some((discoverer) => discoverer.user._id === user._id);
+      const isExpanded = expandedIds.includes(item._id);
 
-    return (
-      <TouchableOpacity
-        onPress={() => toggleExpandPlaceCard(item._id)}
-        style={styles.card}
-      >
-        <Text style={styles.title}>{isDiscovered ? item.name : '???'}</Text>
-        {isExpanded && isDiscovered && item.discoveredBy.map((discovery, index) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <View key={index} style={styles.discoveryDetail}>
-            <Text>{discovery.user.username}</Text>
-            <Text>{new Date(discovery.discoveredAt).toLocaleDateString()}</Text>
-          </View>
-        ))}
-        <Button
-          title="Navigate"
-          onPress={() => {
-            dispatch(selectPlace(item));
-            navigation.navigate('Home');
-          }}
-        />
-      </TouchableOpacity>
-    );
+      return (
+        <TouchableOpacity
+          onPress={() => toggleExpandPlaceCard(item._id)}
+          style={styles.card}
+        >
+          <Text style={styles.title}>{isDiscovered ? item.name : '???'}</Text>
+          {isExpanded && isDiscovered && item.discoveredBy.map((discovery, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <View key={index} style={styles.discoveryDetail}>
+              <Text>{discovery.user.username}</Text>
+              <Text>{new Date(discovery.discoveredDate).toLocaleDateString()}</Text>
+            </View>
+          ))}
+          <Button
+            title="Navigate"
+            onPress={() => {
+              dispatch(selectPlace(item));
+              navigation.navigate('Home');
+            }}
+          />
+        </TouchableOpacity>
+      );
+    }
   };
-
-  const discoveredPlaces = places.filter((place) => place.discoveredBy.some((d) => d.user._id === userId));
-  const undiscoveredPlaces = places.filter((place) => !place.discoveredBy.some((d) => d.user._id === userId));
 
   return (
     <View style={styles.container}>
       <FlatList
-        data={discoveredPlaces}
+        data={preparePlacesData()}
         renderItem={renderPlaceCard}
         keyExtractor={(item) => item._id.toString()}
-        ListHeaderComponent={<Text style={styles.header}>Discovered Places</Text>}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      />
-      <FlatList
-        data={undiscoveredPlaces}
-        renderItem={renderPlaceCard}
-        keyExtractor={(item) => item._id.toString()}
-        ListHeaderComponent={<Text style={styles.header}>Undiscovered Places</Text>}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
       />
     </View>

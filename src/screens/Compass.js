@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
   View, Text, Button, StyleSheet,
 } from 'react-native';
+import { getRhumbLineBearing } from 'geolib';
 import * as Location from 'expo-location';
-
-import { getRhumbLineBearing, getCompassDirection } from 'geolib';
 
 function Compass({ navigation }) {
   const [heading, setHeading] = useState(null);
@@ -15,28 +14,34 @@ function Compass({ navigation }) {
     places, selectedPlace, status, error,
   } = useSelector((state) => state.places);
 
-  const { user, userStatus, userError } = useSelector((state) => state.user);
+  const { user } = useSelector((state) => state.user);
   const { longitude, latitude } = useSelector((state) => state.location);
 
   useEffect(() => {
+    let headingSubscription;
+
     (async () => {
-      await Location.watchHeadingAsync((newHeading) => {
+      headingSubscription = await Location.watchHeadingAsync((newHeading) => {
         setHeading(newHeading);
 
-        if (longitude && latitude) {
+        if (longitude && latitude && selectedPlace) {
           const idealBearing = getRhumbLineBearing(
             { latitude, longitude },
-            { latitude: 43.702806, longitude: -72.288527 },
+            { latitude: selectedPlace.location.coordinates[1], longitude: selectedPlace.location.coordinates[0] },
           );
 
-          console.log('LOOK HERE', idealBearing, newHeading.trueHeading);
-          console.log(angle);
+          const newAngle = idealBearing - newHeading.trueHeading;
 
-          setAngle(idealBearing - newHeading.trueHeading);
+          setAngle((newAngle + 360) % 360); // Normalize angle between 0 and 360
         }
       });
     })();
-  }, []);
+
+    return () => {
+      // eslint-disable-next-line no-unused-expressions
+      headingSubscription && headingSubscription.remove();
+    };
+  }, [longitude, latitude, selectedPlace]);
 
   const renderCompass = () => {
     if (selectedPlace) {
@@ -54,39 +59,12 @@ function Compass({ navigation }) {
     }
   };
 
-  const renderIdealHeading = () => {
-    if (longitude && latitude) {
-      const rhumbBearing = getRhumbLineBearing(
-        { latitude, longitude },
-        { latitude: 43.702806, longitude: -72.288527 },
-      );
-
-      const compassDirection = getCompassDirection(
-        { latitude, longitude },
-        { latitude: 43.702806, longitude: -72.288527 },
-      );
-
-      return (
-        <View>
-          <Text>
-            Ideal Heading Rhumb
-            {rhumbBearing}
-            Compass Direction
-            {compassDirection}
-          </Text>
-        </View>
-      );
-    }
-  };
-
   const compassStyle = {
     transform: [{ rotate: `${angle}deg` }],
   };
 
   const renderHeading = () => {
     if (heading) {
-      /* console.log('HEADING', heading);
-      console.log('TRUE HEADING', heading.trueHeading); */
       return (
         <View>
           <Text>
@@ -110,14 +88,8 @@ function Compass({ navigation }) {
         <Text>
           {`Hey ${user.username}! Let's start exploring`}
         </Text>
-        <Text>
-          Hello
-          {latitude}
-          {longitude}
-        </Text>
         {renderHeading()}
         {renderCompass()}
-        {renderIdealHeading()}
         <Button
           title="Go to Places"
           onPress={() => navigation.navigate('Places')}
@@ -181,7 +153,3 @@ const styles = StyleSheet.create({
 });
 
 export default Compass;
-
-// 43.702806, -72.288527
-
-// RHUMB LINE BEARING IS WHAT WE WANT. SO WE need to get the true heading to match the rhumb line bearing
