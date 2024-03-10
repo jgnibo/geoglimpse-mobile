@@ -83,29 +83,32 @@ function Compass({ navigation }) {
   }, [longitude, latitude, selectedPlace, dispatch, isWithinRange]);
 
   const renderCompass = () => {
-    const isDiscovered = selectedPlace.discoveredBy.some((discoverer) => discoverer.user._id === user._id);
-    if (selectedPlace && isDiscovered) {
-      return (
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}
-        >
-          {`Navigating to ${selectedPlace.name}`}
-        </Text>
-      );
-    } else if (selectedPlace && !isDiscovered) {
-      return (
-        <Text
-          style={{
-            fontSize: 16,
-            fontWeight: 'bold',
-          }}
-        >
-          Navigating to ???
-        </Text>
-      );
+    if (selectedPlace) {
+      const isDiscovered = selectedPlace.discoveredBy.some((discoverer) => discoverer.user._id === user._id);
+
+      if (isDiscovered) {
+        return (
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            {`Navigating to ${selectedPlace.name}`}
+          </Text>
+        );
+      } else {
+        return (
+          <Text
+            style={{
+              fontSize: 16,
+              fontWeight: 'bold',
+            }}
+          >
+            Navigating to ???
+          </Text>
+        );
+      }
     } else {
       return (
 
@@ -231,10 +234,27 @@ function Compass({ navigation }) {
           <View
             style={{
               marginTop: 20,
+              flex: 1,
+              alignItems: 'center',
             }}
           >
             {renderCompass()}
-            <Text>{`Distance to target: ${distance} meters`}</Text>
+
+            {
+              selectedPlace ? (
+                <Text
+                  style={{
+                    fontSize: 16,
+                    fontWeight: 'bold',
+                  }}
+                >
+                  {`${distance} meters away`}
+                </Text>
+              )
+                : null
+
+            }
+
           </View>
         </View>
       </SafeAreaView>
