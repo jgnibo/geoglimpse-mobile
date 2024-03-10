@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
-  View, TextInput, Button, StyleSheet,
-} from 'react-native';
+  Input, InputField, Button, ButtonText, SafeAreaView, FormControl,
+} from '@gluestack-ui/themed';
 import { useDispatch, useSelector } from 'react-redux';
 import { createPlace } from '../redux/placesSlice';
 
@@ -40,42 +40,77 @@ function CreatePlaceScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <TextInput
-        style={styles.input}
-        placeholder="Name"
-        value={name}
-        onChangeText={setName}
-      />
-      <TextInput
-        style={styles.input}
-        placeholder="Description"
-        value={description}
-        onChangeText={setDescription}
-        multiline
-      />
-      <Button
-        title="Create Place"
-        onPress={handleCreatePlace}
-      />
-    </View>
+    // <View style={styles.container}>
+    //   <TextInput
+    //     style={styles.input}
+    //     placeholder="Name"
+    //     value={name}
+    //     onChangeText={setName}
+    //   />
+    //   <TextInput
+    //     style={styles.input}
+    //     placeholder="Description"
+    //     value={description}
+    //     onChangeText={setDescription}
+    //     multiline
+    //   />
+    //   <Button
+    //     title="Create Place"
+    //     onPress={handleCreatePlace}
+    //   />
+    // </View>
+    <SafeAreaView style={{ flex: 1, alignItems: 'center', marginTop: 50 }}>
+      <FormControl
+        size="md"
+        isDisabled={false}
+        isInvalid={false}
+        isReadOnly={false}
+        isRequired={false}
+        style={{ width: 300 }}
+      >
+        <Input
+          style={{ marginBottom: 20 }}
+        >
+          <InputField
+            type="text"
+            defaultValue=""
+            placeholder="Name"
+            value={name}
+            onChangeText={setName}
+          />
+        </Input>
+        <Input
+          style={{ marginBottom: 20 }}
+        >
+          <InputField
+            type="text"
+            defaultValue=""
+            placeholder="Description"
+            value={description}
+            onChangeText={setDescription}
+          />
+        </Input>
+      </FormControl>
+      <Button onPress={handleCreatePlace}>
+        <ButtonText>Create Place</ButtonText>
+      </Button>
+    </SafeAreaView>
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 20,
-  },
-  input: {
-    width: '100%',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 10,
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: 'flex-start',
+//     justifyContent: 'center',
+//   },
+//   input: {
+//     width: '100%',
+//     marginBottom: 20,
+//     borderWidth: 1,
+//     borderColor: '#cccccc',
+//     padding: 10,
+//   },
+// });
 
 export default CreatePlaceScreen;
