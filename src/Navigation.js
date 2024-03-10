@@ -45,7 +45,7 @@ export default function Navigation() {
       await Location.watchPositionAsync(
         {
           // TRY CHANGING THIS TO BESTFORNAVIGATION INSTEAD OF HIGH
-          accuracy: Location.Accuracy.BestForNavigation,
+          accuracy: Location.Accuracy.High,
           timeInterval: 10000,
           distanceInterval: 0,
         },
