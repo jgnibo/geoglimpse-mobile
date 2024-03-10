@@ -33,7 +33,6 @@ export default function Navigation() {
       console.log('WebSocket creating');
       const webSocket = new WebSocket('wss://geoglimpse-backend-r6sn.onrender.com');
 
-      // console.log('WebSocket created', webSocket);
       webSocket.onopen = () => {
         console.log('Connected to the server');
       };
@@ -44,7 +43,7 @@ export default function Navigation() {
 
       await Location.watchPositionAsync(
         {
-          // TRY CHANGING THIS TO BESTFORNAVIGATION INSTEAD OF HIGH
+          // For some reason, High seems to work better in our tests than BestForNavigation
           accuracy: Location.Accuracy.High,
           timeInterval: 10000,
           distanceInterval: 0,

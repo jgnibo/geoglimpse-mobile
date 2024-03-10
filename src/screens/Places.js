@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
-  View, FlatList, Text, TouchableOpacity, RefreshControl, StyleSheet, Button,
+  View, FlatList, Text, TouchableOpacity, RefreshControl, StyleSheet, Button, ActivityIndicator,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { getViewablePlaces, selectPlace } from '../redux/placesSlice';
@@ -14,6 +14,10 @@ function Places({ navigation }) {
   const { user } = useSelector((state) => state.user);
   const [refreshing, setRefreshing] = useState(false);
   const [expandedIds, setExpandedIds] = useState([]);
+
+  useEffect(() => {
+    dispatch(getViewablePlaces(user._id));
+  }, []);
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
@@ -74,16 +78,25 @@ function Places({ navigation }) {
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <FlatList
-        data={preparePlacesData()}
-        renderItem={renderPlaceCard}
-        keyExtractor={(item) => item._id.toString()}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
-      />
-    </View>
-  );
+  if (places) {
+    return (
+      <View style={styles.container}>
+        <FlatList
+          data={preparePlacesData()}
+          renderItem={renderPlaceCard}
+          keyExtractor={(item) => item._id.toString()}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
+        />
+      </View>
+    );
+  } else {
+    return (
+      <View style={styles.container}>
+        <Text>Fetching places...</Text>
+        <ActivityIndicator />
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
