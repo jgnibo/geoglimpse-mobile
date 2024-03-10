@@ -27,8 +27,8 @@ const userSlice = createSlice({
   name: 'places',
   initialState,
   reducers: {
-    selectPlace: (state, action) => {
-      state.selectedPlace = action.payload;
+    setUser: (state, action) => {
+      state.user = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -47,5 +47,7 @@ const userSlice = createSlice({
       });
   },
 });
+
+export const { setUser } = userSlice.actions;
 
 export default userSlice.reducer;
