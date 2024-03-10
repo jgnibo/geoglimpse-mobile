@@ -89,7 +89,7 @@ function Places({ navigation }) {
 
   const renderAccordionPlaceCard = ({ item }) => {
     if (item.type === 'header') {
-      return <Text style={styles.header}>{item.title}</Text>;
+      return <Text key={item._id} style={styles.header}>{item.title}</Text>;
     } else {
       const isDiscovered = item.discoveredBy.some((discoverer) => discoverer.user._id === user._id);
       // const expanded = expandedIds.includes(item._id);

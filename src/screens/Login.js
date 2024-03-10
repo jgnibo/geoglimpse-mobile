@@ -7,16 +7,31 @@ import { useDispatch } from 'react-redux';
 import {
   FormControl, Input, InputField, Button, ButtonText, SafeAreaView,
 } from '@gluestack-ui/themed';
-import { login } from '../redux/userSlice';
+import userApi from '../requests/userApi';
+import { setUser } from '../redux/userSlice';
 
 function LoginPage() {
+  const [loginError, setLoginError] = useState(null);
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const dispatch = useDispatch();
 
-  const handleLogin = () => {
-    // Dispatch login action here, passing username and password
-    dispatch(login({ username }));
+  const handleLogin = async () => {
+    try {
+      const { success, message } = await userApi.login({ username, password });
+      if (!success) {
+        setLoginError(message);
+      } else {
+        const response = await userApi.verifyUser();
+        if (response.status && response.user) {
+          dispatch(setUser(response.user));
+        } else {
+          setLoginError('Error verifying user');
+        }
+      }
+    } catch (error) {
+      console.log('Error here', error);
+    }
   };
 
   return (
@@ -62,6 +77,9 @@ function LoginPage() {
         </Input>
 
       </FormControl>
+      <Text style={{ color: 'red', marginBottom: 20 }}>
+        {loginError}
+      </Text>
       {/* <TextInput placeholder="Username" value={username} onChangeText={setUsername} /> */}
       {/* <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry /> */}
       <Button onPress={handleLogin}>

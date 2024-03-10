@@ -209,12 +209,14 @@ function Compass({ navigation }) {
           // This prop is for android users only
           onRequestClose={() => handleModalClose()}
         >
-          <View style={styles.centeredView}>
+          <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <View style={styles.modalView}>
               {/* <Text style={styles.modalText}>{selectedPlace?.name}</Text> */}
               {renderModalGreeting()}
               <Text style={styles.modalDescription}>{selectedPlace?.description}</Text>
-              <Button title="Close" onPress={() => handleModalClose()} />
+              <Button onPress={() => handleModalClose()}>
+                <ButtonText>Close</ButtonText>
+              </Button>
             </View>
           </View>
         </Modal>
