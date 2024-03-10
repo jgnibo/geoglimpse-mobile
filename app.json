@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "geoglimpse-mobile",
-    "slug": "geoglimpse-mobile",
+    "slug": "geoglimpse",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -25,6 +25,18 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "b97cc53c-eefc-4547-9e9d-c6ff3a920ad8"
+      }
+    },
+    "owner": "jgnibo",
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/b97cc53c-eefc-4547-9e9d-c6ff3a920ad8"
     }
   }
 }

@@ -22,7 +22,8 @@
     "react-native-gesture-handler": "~2.14.0",
     "react-native-websocket": "^1.0.2",
     "react-redux": "^9.1.0",
-    "redux": "^5.0.1"
+    "redux": "^5.0.1",
+    "expo-updates": "~0.24.11"
   },
   "devDependencies": {
     "@babel/core": "^7.20.0",
