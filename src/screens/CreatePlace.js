@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import {
-  View, TextInput, StyleSheet,
-} from 'react-native';
-import {
   Input, InputField, Button, ButtonText, SafeAreaView, FormControl,
 } from '@gluestack-ui/themed';
 import { useDispatch, useSelector } from 'react-redux';
@@ -101,19 +98,19 @@ function CreatePlaceScreen({ navigation }) {
   );
 }
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-  },
-  input: {
-    width: '100%',
-    marginBottom: 20,
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    padding: 10,
-  },
-});
+// const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//     alignItems: 'flex-start',
+//     justifyContent: 'center',
+//   },
+//   input: {
+//     width: '100%',
+//     marginBottom: 20,
+//     borderWidth: 1,
+//     borderColor: '#cccccc',
+//     padding: 10,
+//   },
+// });
 
 export default CreatePlaceScreen;
