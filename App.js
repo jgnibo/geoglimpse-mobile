@@ -1,4 +1,6 @@
 import 'react-native-gesture-handler';
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
 
 import React from 'react';
 import { Provider } from 'react-redux';
@@ -8,8 +10,10 @@ import Navigation from './src/Navigation';
 
 export default function App() {
   return (
-    <Provider store={store}>
-      <Navigation />
-    </Provider>
+    <GluestackUIProvider config={config}>
+      <Provider store={store}>
+        <Navigation />
+      </Provider>
+    </GluestackUIProvider>
   );
 }
