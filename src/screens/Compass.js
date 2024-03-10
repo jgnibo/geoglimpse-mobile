@@ -5,12 +5,14 @@ import {
 } from 'react-native';
 import { getRhumbLineBearing, getDistance } from 'geolib';
 import * as Location from 'expo-location';
+import { discoverPlace } from '../redux/placesSlice';
 
 function Compass({ navigation }) {
   const [heading, setHeading] = useState(null);
   const [angle, setAngle] = useState(0);
   const [modalVisible, setModalVisible] = useState(false);
   const [distance, setDistance] = useState(9999);
+  const [isWithinRange, setIsWithinRange] = useState(false);
 
   const dispatch = useDispatch();
   const { places, selectedPlace } = useSelector((state) => state.places);
@@ -44,6 +46,15 @@ function Compass({ navigation }) {
   }, [longitude, latitude, selectedPlace]);
 
   // Calculate distance to target, handle modal display
+
+  const handleModalClose = () => {
+    setModalVisible(false);
+    const visitedBefore = selectedPlace.discoveredBy.some((d) => d.user._id === user._id);
+    if (!visitedBefore) {
+      dispatch(discoverPlace({ placeId: selectedPlace._id, userId: user._id }));
+    }
+  };
+
   useEffect(() => {
     if (longitude && latitude && selectedPlace) {
       const computedDistance = getDistance(
@@ -55,11 +66,15 @@ function Compass({ navigation }) {
 
       // 6 meters is the approximate radius of each hexagon tile. From a UI perspective, it would look weird if a place was unlocked but the tile wasn't "explored." So ideally the user is within the tile when the explore a place
       if (computedDistance < 6) {
-        setModalVisible(true);
-        // dispatch discover action here
+        if (!isWithinRange) {
+          setIsWithinRange(true);
+          setModalVisible(true);
+        }
+      } else if (isWithinRange) {
+        setIsWithinRange(false);
       }
     }
-  }, [longitude, latitude, selectedPlace, dispatch]);
+  }, [longitude, latitude, selectedPlace, dispatch, isWithinRange]);
 
   const renderCompass = () => {
     if (selectedPlace) {
@@ -75,6 +90,22 @@ function Compass({ navigation }) {
         </View>
       );
     }
+  };
+
+  const renderModalGreeting = () => {
+    if (selectedPlace) {
+      const visitedBefore = selectedPlace.discoveredBy.some((d) => d.user._id === user._id);
+      if (!visitedBefore) {
+        return (
+          <Text style={styles.modalText}>{`You discovered ${selectedPlace.name}!`}</Text>
+        );
+      } else {
+        return (
+          <Text style={styles.modalText}>{`Welcome back to ${selectedPlace.name}!`}</Text>
+        );
+      }
+    }
+    return null;
   };
 
   const compassStyle = {
@@ -122,15 +153,15 @@ function Compass({ navigation }) {
           animationType="slide"
           transparent
           visible={modalVisible}
-          onRequestClose={() => {
-            setModalVisible(!modalVisible);
-          }}
+          // This prop is for android users only
+          onRequestClose={() => handleModalClose()}
         >
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>{selectedPlace?.name}</Text>
+              {/* <Text style={styles.modalText}>{selectedPlace?.name}</Text> */}
+              {renderModalGreeting()}
               <Text style={styles.modalDescription}>{selectedPlace?.description}</Text>
-              <Button title="Close" onPress={() => setModalVisible(!modalVisible)} />
+              <Button title="Close" onPress={() => handleModalClose()} />
             </View>
           </View>
         </Modal>

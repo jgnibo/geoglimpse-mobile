@@ -50,11 +50,25 @@ const getPublicPlaces = async () => {
   }
 };
 
+const discoverPlace = async (discoveryData) => {
+  try {
+    const { data } = await apiRequest({
+      method: 'post',
+      url: `${SERVER_URL}/api/places/discover`,
+      data: discoveryData,
+    });
+    return data;
+  } catch (error) {
+    throw new Error(`Error discovering place: ${error}`);
+  }
+};
+
 const placesApi = {
   createPlace,
   getAuthoredPlaces,
   getViewablePlaces,
   getPublicPlaces,
+  discoverPlace,
 };
 
 export default placesApi;
