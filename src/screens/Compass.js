@@ -1,25 +1,26 @@
 import React, { useState, useEffect } from 'react';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
-  View, Text, Button, StyleSheet,
+  View, Text, Button, StyleSheet, Modal, SafeAreaView,
 } from 'react-native';
-import { getRhumbLineBearing } from 'geolib';
+import { getRhumbLineBearing, getDistance } from 'geolib';
 import * as Location from 'expo-location';
 
 function Compass({ navigation }) {
   const [heading, setHeading] = useState(null);
   const [angle, setAngle] = useState(0);
-  const {
-    // eslint-disable-next-line no-unused-vars
-    places, selectedPlace, status, error,
-  } = useSelector((state) => state.places);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [distance, setDistance] = useState(9999);
+
+  const dispatch = useDispatch();
+  const { places, selectedPlace } = useSelector((state) => state.places);
 
   const { user } = useSelector((state) => state.user);
   const { longitude, latitude } = useSelector((state) => state.location);
 
+  // Subscribe to device heading and handle compass angle updates
   useEffect(() => {
     let headingSubscription;
-
     (async () => {
       headingSubscription = await Location.watchHeadingAsync((newHeading) => {
         setHeading(newHeading);
@@ -36,12 +37,29 @@ function Compass({ navigation }) {
         }
       });
     })();
-
     return () => {
       // eslint-disable-next-line no-unused-expressions
       headingSubscription && headingSubscription.remove();
     };
   }, [longitude, latitude, selectedPlace]);
+
+  // Calculate distance to target, handle modal display
+  useEffect(() => {
+    if (longitude && latitude && selectedPlace) {
+      const computedDistance = getDistance(
+        { latitude, longitude },
+        { latitude: selectedPlace.location.coordinates[1], longitude: selectedPlace.location.coordinates[0] },
+      );
+
+      setDistance(computedDistance);
+
+      // 6 meters is the approximate radius of each hexagon tile. From a UI perspective, it would look weird if a place was unlocked but the tile wasn't "explored." So ideally the user is within the tile when the explore a place
+      if (computedDistance < 6) {
+        setModalVisible(true);
+        // dispatch discover action here
+      }
+    }
+  }, [longitude, latitude, selectedPlace, dispatch]);
 
   const renderCompass = () => {
     if (selectedPlace) {
@@ -84,12 +102,13 @@ function Compass({ navigation }) {
   };
   if (places) {
     return (
-      <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+      <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
         <Text>
           {`Hey ${user.username}! Let's start exploring`}
         </Text>
         {renderHeading()}
         {renderCompass()}
+        <Text>{`Distance to target: ${distance} meters`}</Text>
         <Button
           title="Go to Places"
           onPress={() => navigation.navigate('Places')}
@@ -99,16 +118,33 @@ function Compass({ navigation }) {
           onPress={() => navigation.navigate('CreatePlace')}
         />
 
+        <Modal
+          animationType="slide"
+          transparent
+          visible={modalVisible}
+          onRequestClose={() => {
+            setModalVisible(!modalVisible);
+          }}
+        >
+          <View style={styles.centeredView}>
+            <View style={styles.modalView}>
+              <Text style={styles.modalText}>{selectedPlace?.name}</Text>
+              <Text style={styles.modalDescription}>{selectedPlace?.description}</Text>
+              <Button title="Close" onPress={() => setModalVisible(!modalVisible)} />
+            </View>
+          </View>
+        </Modal>
+
         <View style={styles.container}>
           <View style={[styles.circle, compassStyle]}>
             <View style={styles.triangle} />
           </View>
         </View>
-      </View>
+      </SafeAreaView>
     );
   }
   return (
-    <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+    <SafeAreaView style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
       <Text>Loading...</Text>
       <Button
         title="Go to Places"
@@ -118,7 +154,7 @@ function Compass({ navigation }) {
         title="Create a Place"
         onPress={() => navigation.navigate('CreatePlace')}
       />
-    </View>
+    </SafeAreaView>
   );
 }
 
@@ -149,6 +185,29 @@ const styles = StyleSheet.create({
     borderRightColor: 'transparent',
     borderBottomColor: 'red', // Change the color if needed
     transform: [{ translateY: -10 }],
+  },
+  modalView: {
+    margin: 20,
+    backgroundColor: 'white',
+    borderRadius: 20,
+    padding: 35,
+    alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 4,
+    elevation: 5,
+  },
+  modalText: {
+    marginBottom: 15,
+    textAlign: 'center',
+  },
+  modalDescription: {
+    marginBottom: 15,
+    textAlign: 'center',
   },
 });
 
