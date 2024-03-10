@@ -32,6 +32,7 @@ export default function Navigation() {
 
       console.log('WebSocket creating');
       const webSocket = new WebSocket('wss://geoglimpse-backend-r6sn.onrender.com');
+
       // console.log('WebSocket created', webSocket);
       webSocket.onopen = () => {
         console.log('Connected to the server');
@@ -62,10 +63,11 @@ export default function Navigation() {
   }, []);
 
   useEffect(() => {
-    if (ws && ws.readyState === WebSocket.OPEN) {
+    if (user && user._id && ws && ws.readyState === WebSocket.OPEN) {
       ws.send(JSON.stringify({
         latitude: lastSentLocation[0],
         longitude: lastSentLocation[1],
+        userId: user._id,
       }));
     }
   }, [lastSentLocation]);
